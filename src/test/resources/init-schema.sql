@@ -65,9 +65,7 @@ CREATE TABLE `message`
     PRIMARY KEY (`id`),
     INDEX `conversation_index` (`conversation_id` ASC),
     INDEX `created_date` (`created_date` ASC)
-)
-    ENGINE = InnoDB
-    DEFAULT CHARACTER SET = utf8;
+)ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;
 
 DROP TABLE IF EXISTS `feed`;
 CREATE TABLE `feed`

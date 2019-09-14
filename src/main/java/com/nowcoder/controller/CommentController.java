@@ -30,10 +30,8 @@ public class CommentController {
 
 	@Autowired
 	CommentService commentService;
-
 	@Autowired
 	QuestionService questionService;
-
 	@Autowired
 	EventProducer eventProducer;
 
@@ -47,18 +45,20 @@ public class CommentController {
 			if (hostHolder.getUser() != null) {
 				comment.setUserId(hostHolder.getUser().getId());
 			} else {
-				comment.setUserId(WendaUtil.ANONYMOUS_USERID);
-				// return "redirect:/reglogin";
+//				comment.setUserId(WendaUtil.ANONYMOUS_USERID);
+				return "redirect:/reglogin";
 			}
 			comment.setCreatedDate(new Date());
 			comment.setEntityType(EntityType.ENTITY_QUESTION);
 			comment.setEntityId(questionId);
 			commentService.addComment(comment);
 
+			//会有并发问题，可通过数据库加锁解决
 			int count = commentService.getCommentCount(comment.getEntityId(), comment.getEntityType());
 			questionService.updateCommentCount(comment.getEntityId(), count);
 
-			eventProducer.fireEvent(new EventModel(EventType.COMMENT).setActorId(comment.getUserId())
+			eventProducer.fireEvent(new EventModel(EventType.COMMENT)
+					.setActorId(comment.getUserId())
 					.setEntityId(questionId));
 
 		} catch (Exception e) {

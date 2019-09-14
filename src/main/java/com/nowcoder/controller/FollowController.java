@@ -24,19 +24,14 @@ import java.util.*;
 public class FollowController {
     @Autowired
     FollowService followService;
-
     @Autowired
     CommentService commentService;
-
     @Autowired
     QuestionService questionService;
-
     @Autowired
     UserService userService;
-
     @Autowired
     HostHolder hostHolder;
-
     @Autowired
     EventProducer eventProducer;
 

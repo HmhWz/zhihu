@@ -62,8 +62,8 @@ public class HomeController {
 
 	@RequestMapping(path = {"/user/{userId}"}, method = {RequestMethod.GET, RequestMethod.POST})
 	public String userIndex(Model model, @PathVariable("userId") int userId) {
-		model.addAttribute("vos", getQuestions(userId, 0, 10));
 
+		model.addAttribute("vos", getQuestions(userId, 0, 10));
 		User user = userService.getUser(userId);
 		ViewObject vo = new ViewObject();
 		vo.set("user", user);

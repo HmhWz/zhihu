@@ -27,13 +27,10 @@ public class SearchController {
     private static final Logger logger = LoggerFactory.getLogger(SearchController.class);
     @Autowired
     SearchService searchService;
-
     @Autowired
     FollowService followService;
-
     @Autowired
     UserService userService;
-
     @Autowired
     QuestionService questionService;
 

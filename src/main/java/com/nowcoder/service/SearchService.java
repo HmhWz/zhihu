@@ -2,12 +2,15 @@ package com.nowcoder.service;
 
 import com.nowcoder.model.Question;
 import org.apache.http.client.HttpClient;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,8 +23,13 @@ import java.util.Map;
  */
 @Service
 public class SearchService {
-	public static final String SOLR_URL = "http://localhost:8983/solr/wenda";
-	private HttpSolrClient client = new HttpSolrClient.Builder(SOLR_URL).build();
+
+	/*public static final String SOLR_URL = "http://localhost:8983/solr/zhihu";
+	private HttpSolrClient client = new HttpSolrClient(SOLR_URL);*/
+
+	@Autowired
+	private SolrClient client;
+
 	private static final String QUESTION_TITLE_FIELD = "question_title";
 	private static final String QUESTION_CONTENT_FIELD = "question_content";
 
@@ -60,7 +68,7 @@ public class SearchService {
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.setField("id", qid);
 		doc.setField(QUESTION_TITLE_FIELD, title);
-		doc.setField("QUESTION_CONTENT_FIELD", content);
+		doc.setField(QUESTION_CONTENT_FIELD, content);
 		UpdateResponse response = client.add(doc, 1000);
 		return response != null && response.getStatus() == 0;
 	}

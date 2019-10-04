@@ -22,59 +22,59 @@ import java.util.Map;
  */
 @Service
 public class EventConsumer implements InitializingBean, ApplicationContextAware {
-    private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
-    private Map<EventType, List<EventHandler>> config = new HashMap<EventType, List<EventHandler>>();
-    private ApplicationContext applicationContext;
+	private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
+	private Map<EventType, List<EventHandler>> config = new HashMap<>();
+	private ApplicationContext applicationContext;
 
-    @Autowired
-    JedisAdapter jedisAdapter;
+	@Autowired
+	JedisAdapter jedisAdapter;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Map<String, EventHandler> beans = applicationContext.getBeansOfType(EventHandler.class);
-        if (beans != null) {
-            for (Map.Entry<String, EventHandler> entry : beans.entrySet()) {
-                List<EventType> eventTypes = entry.getValue().getSupportEventTypes();
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Map<String, EventHandler> beans = applicationContext.getBeansOfType(EventHandler.class);
+		if (beans != null) {
+			for (Map.Entry<String, EventHandler> entry : beans.entrySet()) {
+				List<EventType> eventTypes = entry.getValue().getSupportEventTypes();
 
-                for (EventType type : eventTypes) {
-                    if (!config.containsKey(type)) {
-                        config.put(type, new ArrayList<EventHandler>());
-                    }
-                    config.get(type).add(entry.getValue());
-                }
-            }
-        }
+				for (EventType type : eventTypes) {
+					if (!config.containsKey(type)) {
+						config.put(type, new ArrayList<EventHandler>());
+					}
+					config.get(type).add(entry.getValue());
+				}
+			}
+		}
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    String key = RedisKeyUtil.getEventQueueKey();
-                    List<String> events = jedisAdapter.brpop(0, key);
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					String key = RedisKeyUtil.getEventQueueKey();
+					List<String> events = jedisAdapter.brpop(0, key);
 
-                    for (String message : events) {
-                        if (message.equals(key)) {
-                            continue;
-                        }
+					for (String message : events) {
+						if (message.equals(key)) {
+							continue;
+						}
 
-                        EventModel eventModel = JSON.parseObject(message, EventModel.class);
-                        if (!config.containsKey(eventModel.getType())) {
-                            logger.error("不能识别的事件");
-                            continue;
-                        }
+						EventModel eventModel = JSON.parseObject(message, EventModel.class);
+						if (!config.containsKey(eventModel.getType())) {
+							logger.error("不能识别的事件");
+							continue;
+						}
 
-                        for (EventHandler handler : config.get(eventModel.getType())) {
-                            handler.doHandle(eventModel);
-                        }
-                    }
-                }
-            }
-        });
-        thread.start();
-    }
+						for (EventHandler handler : config.get(eventModel.getType())) {
+							handler.doHandle(eventModel);
+						}
+					}
+				}
+			}
+		});
+		thread.start();
+	}
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 }

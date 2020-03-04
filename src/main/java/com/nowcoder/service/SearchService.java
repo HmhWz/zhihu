@@ -1,15 +1,19 @@
 package com.nowcoder.service;
 
+import com.nowcoder.controller.SearchController;
 import com.nowcoder.model.Question;
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +28,13 @@ import java.util.Map;
 @Service
 public class SearchService {
 
-	/*public static final String SOLR_URL = "http://localhost:8983/solr/zhihu";
-	private HttpSolrClient client = new HttpSolrClient(SOLR_URL);*/
+	private static final String SOLR_URL = "http://localhost:8983/solr/zhihu";
+	private SolrClient client = new HttpSolrClient.Builder(SOLR_URL).build();
 
-	@Autowired
-	private SolrClient client;
+	private static final Logger logger = LoggerFactory.getLogger(SearchController.class);
+
+	/*@Autowired
+	private SolrClient client;*/
 
 	private static final String QUESTION_TITLE_FIELD = "question_title";
 	private static final String QUESTION_CONTENT_FIELD = "question_content";
@@ -36,14 +42,20 @@ public class SearchService {
 	public List<Question> searchQuestion(String keyword, int offset, int count,
 										 String hlPre, String hlPos) throws IOException, SolrServerException {
 		List<Question> questionList = new ArrayList<>();
-		SolrQuery query = new SolrQuery(keyword);
+		SolrQuery query = new SolrQuery();
+		query.set("q", keyword);
 		query.setRows(count);
 		query.setStart(offset);
+		query.set("df",QUESTION_TITLE_FIELD);
 		query.setHighlight(true);
 		query.setHighlightSimplePre(hlPre);
 		query.setHighlightSimplePost(hlPos);
 		query.set("hl.fl", QUESTION_TITLE_FIELD + "," + QUESTION_CONTENT_FIELD);
 		QueryResponse response = client.query(query);
+		SolrDocumentList solrDocumentList = response.getResults();
+		if(solrDocumentList.isEmpty()){
+			logger.error("记录数为空！！！");
+		}
 		for (Map.Entry<String, Map<String, List<String>>> entry : response.getHighlighting().entrySet()) {
 			Question q = new Question();
 			q.setId(Integer.parseInt(entry.getKey()));
@@ -61,6 +73,16 @@ public class SearchService {
 			}
 			questionList.add(q);
 		}
+
+		/*Map<String, Map<String, List<String>>> highlighting = response.getHighlighting();
+		for (SolrDocument solrDocument : solrDocumentList) {
+			//取商品信息
+			Question question = new Question();
+			question.setContent((String) solrDocument.get(QUESTION_CONTENT_FIELD));
+			question.setId((int) solrDocument.get("id"));
+			question.setTitle((String) solrDocument.get(QUESTION_TITLE_FIELD));
+			questionList.add(question);
+		}*/
 		return questionList;
 	}
 

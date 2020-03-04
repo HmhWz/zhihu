@@ -41,6 +41,9 @@ public class SearchController {
         try {
             List<Question> questionList = searchService.searchQuestion(keyword, offset, count,
                     "<em>", "</em>");
+            if(questionList.isEmpty()){
+            	logger.error("查询结果为空！！！！！");
+			}
             List<ViewObject> vos = new ArrayList<>();
             for (Question question : questionList) {
                 Question q = questionService.getById(question.getId());
@@ -59,7 +62,8 @@ public class SearchController {
             model.addAttribute("vos", vos);
             model.addAttribute("keyword", keyword);
         } catch (Exception e) {
-            logger.error("搜索评论失败" + e.getMessage());
+            logger.error("搜索出现异常：");
+            e.printStackTrace();
         }
         return "result";
     }

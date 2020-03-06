@@ -1,29 +1,16 @@
 # zhihu
 仿照知乎做的一个Java web项目，是一个sns+资讯的web应用。使用SpringBoot+Mybatis+velocity开发。数据库使用了redis和mysql，同时加入了异步消息等进阶功能，同时使用python爬虫进行数据填充。
 
-## 项目基础配置
-
-    创建git仓库，本地配置idea并测试pull和push。
-    
-    创建SpringBoot工程，导入Web，Velocity和Aop的包。
-    
-    生成Maven项目，pom.xml包含上述依赖，应用名称是toutiao,小组id是com.nowcoder。
-    
+   
 ## 基本框架开发
     
-    创建基本的controller，service和model层。
-    
     controller中使用注解配置，requestmapping，responsebody基本可以解决请求转发以及响应内容的渲染。responsebody自动选择viewresolver进行解析。
-    
-    使用pathvariable和requestparam传递参数。
-    
+
     使用velocity编写页面模板，注意其中的语法使用。常用$!{}和${}
     
     使用http规范下的httpservletrequest和httpservletresponse来封装请求和相响应，使用封装好的session和cookie对象。
     
     使用重定向的redirectview和统一异常处理器exceptionhandler
-    
-AOP和IOC
 
     IOC解决对象实例化以及依赖传递问题，解耦。
     
@@ -31,31 +18,6 @@ AOP和IOC
     
     aspect实现切面，并且使用logger来记录日志，用该切面的切面方法来监听controller。
 
-## 数据库配置和首页的创建
-   
-    加入mybatis和mysql的maven仓库，注意，由于现在版本的springboot不再支持velocity进而导致我使用较早版本的springboot，所以这里提供一可以正常运行的版本设置。
-
-    springboot使用1.4.0
-
-    mybatis-spring-boot-starter使用1.2.1
-
-    mysql-connector-java使用5.1.6
-
-    亲测可用。
-    
-    接下来写controller，dao和service。注意mybatis的注解语法以及xml的配置要求，xml要求放在resource中并且与dao接口在相同的包路径下。
-    
-    application.properties增加spring配置数据库链接地址
-    
-    两个小工具：
-    ViewObject:方便传递任何数据到
-    VelocityDateTool:velocity自带工具类
-    
-    写好静态文件html css和js。并且注意需要配置
-    spring.velocity.suffix=.html 保证跳转请求转发到html上
-    spring.velocity.toolbox-config-location=toolbox.xml
-    
-    至此主页基本完成，具体业务逻辑请参考代码。
    
 ## 用户注册登录以及使用token
 
